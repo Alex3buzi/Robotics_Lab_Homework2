@@ -48,23 +48,6 @@ Possible values for `ctrl` are:
 
 ---
 
-## Action Server Command
-
-The `ros2_kdl_node` also acts as an action server that executes a Cartesian linear trajectory defined by timing and target position parameters.
-The client sends a goal specifying the desired trajectory duration, acceleration duration, total motion time, proportional gain, and the final end-effector position.
-
-To send a goal to the trajectory execution action server, use:
-
-```bash
-ros2 action send_goal /execute_trajectory ros2_kdl_package/action/ExecuteTrajectory \
-"{traj_duration: 25.0, acc_duration: 10.0, total_time: 25.0, kp: 1.0, end_position_x: 0.7, end_position_y: 0.0, end_position_z: 1.0}"
-```
-
-During execution, the node publishes position error feedback so that the client can monitor tracking performance.
-
-
----
-
 ## Controllers
 
 ### Null-space Velocity Controller
@@ -113,6 +96,23 @@ ros2 launch ros2_kdl_package ros2_kdl_node.launch.py ctrl:=vision_ctrl
 ```
 
 Move the ArUco marker in Gazebo to test the “look-at” behavior.
+
+---
+
+## Action Server Command
+
+The `ros2_kdl_node` also acts as an action server that executes a Cartesian linear trajectory defined by timing and target position parameters.
+The client sends a goal specifying the desired trajectory duration, acceleration duration, total motion time, proportional gain, and the final end-effector position.
+
+To send a goal to the trajectory execution action server, use:
+
+```bash
+ros2 action send_goal /execute_trajectory ros2_kdl_package/action/ExecuteTrajectory \
+"{traj_duration: 25.0, acc_duration: 10.0, total_time: 25.0, kp: 1.0, end_position_x: 0.7, end_position_y: 0.0, end_position_z: 1.0}"
+```
+
+During execution, the node publishes position error feedback so that the client can monitor tracking performance.
+
 
 ---
 
