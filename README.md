@@ -8,6 +8,13 @@ It also includes an action server for executing trajectories and a Gazebo–ROS2
 
 ---
 
+## Setup and Build
+
+Before running any node or simulation, build the workspace and source the environment:
+```bash
+colcon build
+source install/setup.bash
+```
 
 ## Simulation Environments
 
