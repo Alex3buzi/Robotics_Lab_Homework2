@@ -301,7 +301,7 @@ def generate_launch_description():
     """declared_arguments.append(DeclareLaunchArgument('gz_args', default_value='-r -v 1 empty.sdf',
                               description='Arguments for gz_sim'),)"""
         
-    declared_arguments.append(DeclareLaunchArgument('gz_args', default_value=iiwa_simulation_world,
+    declared_arguments.append(DeclareLaunchArgument('gz_args', default_value=[iiwa_simulation_world, ' -r'],
                             description='Arguments for gz_sim'),)
     
     """
@@ -439,4 +439,5 @@ def generate_launch_description():
     ]
 
     return LaunchDescription(declared_arguments + nodes)
+
 
