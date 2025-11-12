@@ -8,26 +8,27 @@ It also includes an action server for executing trajectories and a Gazebo–ROS2
 
 ---
 
-## Before Running the Controllers
 
-Before launching any controller or action, you must first start either the RViz or Gazebo simulator environment.
+## Simulation Environments
 
-Launch in RViz:
+### Launch RViz Simulator
+
 ```bash
-ros2 launch iiwa_description aruco_gazebo.launch.py \
-  start_rviz:=true \
-  robot_controller:=velocity_controller \
-  command_interface:=velocity
+ros2 launch iiwa_description aruco_gazebo.launch.py robot_controller:=velocity_controller command_interface:=velocity
 ```
-  
-Launch in Gazebo:
+
+### Launch Gazebo Simulator
+
+Launch Gazebo with the robot commanded by a velocity controller.
+The world by default is `aruco.world`, which contains an ArUco tag visible to the camera.
+
 ```bash
-ros2 launch iiwa_description aruco_gazebo.launch.py \
-  start_rviz:=false \
-  robot_controller:=velocity_controller \
-  command_interface:=velocity \
-  use_sim:=true
+ros2 launch iiwa_description aruco_gazebo.launch.py start_rviz:=false robot_controller:=velocity_controller command_interface:=velocity use_sim:=true
 ```
+
+**Note:** Launch the simulators in a separate terminal.
+
+---
 
 ## Launching the Node
 
@@ -95,27 +96,6 @@ Alternatively, use the launch file:
 ```bash
 ros2 launch ros2_kdl_package ros2_kdl_node.launch.py ctrl:=velocity_ctrl
 ```
-
----
-
-## Simulation Environments
-
-### Launch RViz Simulator
-
-```bash
-ros2 launch iiwa_description aruco_gazebo.launch.py robot_controller:=velocity_controller command_interface:=velocity
-```
-
-### Launch Gazebo Simulator
-
-Launch Gazebo with the robot commanded by a velocity controller.
-The world by default is `aruco.world`, which contains an ArUco tag visible to the camera.
-
-```bash
-ros2 launch iiwa_description aruco_gazebo.launch.py start_rviz:=false robot_controller:=velocity_controller command_interface:=velocity use_sim:=true
-```
-
-**Note:** Launch the simulators in a separate terminal.
 
 ---
 
