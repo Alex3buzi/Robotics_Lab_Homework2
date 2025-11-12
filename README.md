@@ -33,7 +33,7 @@ The world by default is `aruco.world`, which contains an ArUco tag visible to th
 ros2 launch iiwa_description aruco_gazebo.launch.py start_rviz:=false robot_controller:=velocity_controller command_interface:=velocity use_sim:=true
 ```
 
-**Note:** Launch the simulators in a separate terminal.
+**Note:** Launch the simulators one at time.
 
 ---
 
