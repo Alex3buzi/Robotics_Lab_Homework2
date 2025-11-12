@@ -8,6 +8,23 @@ It also includes an action server for executing trajectories and a Gazebo–ROS2
 
 ---
 
+## Before Running the Controllers
+
+Before launching any controller or action, you must first start either the RViz or Gazebo simulator environment.
+
+Launch in RViz:
+ros2 launch iiwa_description aruco_gazebo.launch.py \
+  start_rviz:=true \
+  robot_controller:=velocity_controller \
+  command_interface:=velocity
+  
+Launch in Gazebo:
+ros2 launch iiwa_description aruco_gazebo.launch.py \
+  start_rviz:=false \
+  robot_controller:=velocity_controller \
+  command_interface:=velocity \
+  use_sim:=true
+
 ## Launching the Node
 
 The node loads its parameters automatically from the `config/kdl_params.yaml` file when launched.
