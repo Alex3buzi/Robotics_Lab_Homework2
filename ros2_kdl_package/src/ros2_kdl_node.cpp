@@ -326,6 +326,10 @@ class Iiwa_pub_sub : public rclcpp::Node
                 Eigen::Vector3d error = computeLinearError(p_.pos, Eigen::Vector3d(cartpos.p.data));
                 Eigen::Vector3d o_error = computeOrientationError(toEigen(init_cart_pose_.M), toEigen(cartpos.M));
 
+                if(ctrl_ != "vision_ctrl"){
+                    std::cout << "The error norm is : " << error.norm() << std::endl;
+                }
+
 
                 if(cmd_interface_ == "position"){
 
@@ -359,7 +363,7 @@ class Iiwa_pub_sub : public rclcpp::Node
                     }
                     else{
                         joint_velocities_cmd_.data.setZero(joint_velocities_cmd_.data.size());
-                        RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 2000, "Nessuna posa visiva disponibile!");
+                        RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 2000, "No poses available!");
                     }
 
 
