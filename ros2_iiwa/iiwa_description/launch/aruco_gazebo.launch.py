@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os 
+from ament_index_python.packages import get_package_share_directory # ADDED
+
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, RegisterEventHandler, TimerAction
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, RegisterEventHandler, TimerAction, SetEnvironmentVariable # Added: SetEnvironmentVariable
 from launch.conditions import IfCondition, UnlessCondition
 from launch.event_handlers import OnProcessExit, OnProcessStart
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -23,6 +26,18 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
+    
+    iiwa_description_str = get_package_share_directory('iiwa_description') # ADDED
+    
+    gazebo_models_path = os.path.join(iiwa_description_str, 'gazebo', 'models') # ADDED
+
+    if 'GAZEBO_MODEL_PATH' in os.environ:
+        model_path = os.environ['GAZEBO_MODEL_PATH'] + ':' + gazebo_models_path # 
+    else:
+        model_path = gazebo_models_path # ADDED
+
+    set_gazebo_model_path = SetEnvironmentVariable('GAZEBO_MODEL_PATH', model_path) # ADDED
+
     # Declare arguments
     declared_arguments = []
     declared_arguments.append(
@@ -180,41 +195,18 @@ def generate_launch_description():
                 [FindPackageShare(description_package), 'config', description_file]
             ),
             ' ',
-            'prefix:=',
-            prefix,
-            ' ',
-            'use_sim:=',
-            use_sim,
-            ' ',
-            'use_fake_hardware:=',
-            use_fake_hardware,
-            ' ',
-            'robot_ip:=',
-            robot_ip,
-            ' ',
-            'robot_port:=',
-            robot_port,
-            ' ',
-            'initial_positions_file:=',
-            initial_positions_file,
-            ' ',
-            'command_interface:=',
-            command_interface,
-            ' ',
-            'base_frame_file:=',
-            base_frame_file,
-            ' ',
-            'description_package:=',
-            description_package,
-            ' ',
-            'runtime_config_package:=',
-            runtime_config_package,
-            ' ',
-            'controllers_file:=',
-            controllers_file,
-            ' ',
-            'namespace:=',
-            namespace,
+            'prefix:=', prefix, ' ',
+            'use_sim:=', use_sim, ' ',
+            'use_fake_hardware:=', use_fake_hardware, ' ',
+            'robot_ip:=', robot_ip, ' ',
+            'robot_port:=', robot_port, ' ',
+            'initial_positions_file:=', initial_positions_file, ' ',
+            'command_interface:=', command_interface, ' ',
+            'base_frame_file:=', base_frame_file, ' ',
+            'description_package:=', description_package, ' ',
+            'runtime_config_package:=', runtime_config_package, ' ',
+            'controllers_file:=', controllers_file, ' ',
+            'namespace:=', namespace,
         ]
     )
 
@@ -223,9 +215,7 @@ def generate_launch_description():
     # Running with Moveit2 planning
     iiwa_planning_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
-            FindPackageShare('iiwa_bringup'),
-            '/launch',
-            '/iiwa_planning.launch.py'
+            FindPackageShare('iiwa_bringup'), '/launch', '/iiwa_planning.launch.py'
         ]),
         launch_arguments={
             'description_package': description_package,
@@ -242,9 +232,7 @@ def generate_launch_description():
     # Running with Moveit2 servoing
     iiwa_servoing_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
-            FindPackageShare('iiwa_bringup'),
-            '/launch',
-            '/iiwa_servoing.launch.py'
+            FindPackageShare('iiwa_bringup'), '/launch', '/iiwa_servoing.launch.py'
         ]),
         launch_arguments={
             'description_package': description_package,
@@ -288,27 +276,18 @@ def generate_launch_description():
         name='rviz2',
         output='log',
         arguments=['-d', rviz_config_file],
-        parameters=[
-            robot_description,
-        ],
+        parameters=[robot_description],
         condition=UnlessCondition(OrSubstitution(use_planning, use_sim)),
     )
+    
     iiwa_simulation_world = PathJoinSubstitution(
         [FindPackageShare(description_package),
             'gazebo/worlds', 'aruco.world']
     )
 
-    """declared_arguments.append(DeclareLaunchArgument('gz_args', default_value='-r -v 1 empty.sdf',
-                              description='Arguments for gz_sim'),)"""
-        
     declared_arguments.append(DeclareLaunchArgument('gz_args', default_value=[iiwa_simulation_world, ' -r'],
                             description='Arguments for gz_sim'),)
     
-    """
-    export GZ_SIM_RESOURCE_PATH=$GZ_SIM_RESOURCE_PATH:world_simulation_models
-        Siccome il suo empty.world si richiama un ground plane e un sun, assicurati di avere tali modelli installati da qualche
-        parte sul tuo pc, e metti quel percorso nella EV
-    """
     gazebo = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 [PathJoinSubstitution([FindPackageShare('ros_gz_sim'),
@@ -318,7 +297,6 @@ def generate_launch_description():
             condition=IfCondition(use_sim),
     )
 
-    
     spawn_entity = Node(
         package='ros_gz_sim',
         executable='create',
@@ -350,7 +328,7 @@ def generate_launch_description():
         arguments=[robot_controller, '--controller-manager', [namespace, 'controller_manager']],
     )
 
-    # Delay `joint_state_broadcaster` after spawn_entity
+    # Delays and Event Handlers (rimangono uguali)
     delay_joint_state_broadcaster_spawner_after_spawn_entity = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=spawn_entity,
@@ -359,7 +337,6 @@ def generate_launch_description():
         condition=IfCondition(use_sim),
     )
 
-    # Delay `joint_state_broadcaster` after control_node
     delay_joint_state_broadcaster_spawner_after_control_node = RegisterEventHandler(
         event_handler=OnProcessStart(
             target_action=control_node,
@@ -368,7 +345,6 @@ def generate_launch_description():
         condition=UnlessCondition(use_sim),
     )
 
-    # Delay rviz start after `joint_state_broadcaster`
     delay_rviz_after_joint_state_broadcaster_spawner = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=joint_state_broadcaster_spawner,
@@ -377,14 +353,12 @@ def generate_launch_description():
         condition=IfCondition(start_rviz),
     )
 
-    # Delay start of robot_controller after `joint_state_broadcaster`
     delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=joint_state_broadcaster_spawner,
             on_exit=[robot_controller_spawner],
         )
     )
-    
 
     bridge = Node(
         package='ros_gz_bridge',
@@ -393,18 +367,13 @@ def generate_launch_description():
         arguments=[
             '/camera@sensor_msgs/msg/Image@gz.msgs.Image',
             '/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo',
-            
             '/world/aruco_world/set_pose@ros_gz_interfaces/srv/SetEntityPose@gz.msgs.Pose@gz.msgs.Boolean',
-            
             '--ros-args', '--remap', '/camera:=/videocamera',
             '--ros-args', '--remap', '/camera_info:=/videocamera_info'  
         ],
         output='screen'
     )
     
-    
-      
-
     aruco_node = Node(
         package='aruco_ros',
         executable='single',
@@ -423,6 +392,7 @@ def generate_launch_description():
     )
 
     nodes = [
+        set_gazebo_model_path, # ADDED
         gazebo,
         control_node,
         iiwa_planning_launch,
@@ -439,5 +409,6 @@ def generate_launch_description():
     ]
 
     return LaunchDescription(declared_arguments + nodes)
+
 
 
