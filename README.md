@@ -58,14 +58,12 @@ ros2 launch ros2_kdl_package ros2_kdl_node.launch.py ctrl:=vision_ctrl
 ---
 
 ## Send Trajectory Goal
-
-Execute Cartesian trajectory:
 To execute the trajectory, launch the Action Client. This node loads the parameters from config/kdl_params.yaml and sends the goal to the server.
 
 ```bash
 ros2 launch ros2_kdl_package kdl_client.launch.py
 ```
-##Configuration
+## Configuration
 
 You can modify the trajectory points and duration by editing the YAML file:
 - File: src/ros2_kdl_package/config/kdl_params.yaml
