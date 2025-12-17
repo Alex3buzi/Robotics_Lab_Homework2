@@ -37,38 +37,39 @@ ros2 launch iiwa_description aruco_gazebo.launch.py start_rviz:=false robot_cont
 
 ---
 
-## Launching the Node
+## Launching the Action Server
+Launch the main KDL node. This node acts as an Action Server. It initializes the robot and controllers but waits for a goal before moving.
 
-Load parameters from `config/kdl_params.yaml` and select controller:
-
+## To run with Velocity-ctrl (Standard velocity):
 ```bash
-ros2 launch ros2_kdl_package ros2_kdl_node.launch.py ctrl:=<controller_type>
+ros2 launch ros2_kdl_package ros2_kdl_node.launch.py ctrl:=velocity_ctrl
 ```
 
-Controller options:
-
-* `velocity_ctrl` – standard velocity
-* `velocity_ctrl_null` – null-space velocity
-* `vision_ctrl` – vision-based with ArUco
-
-Or run directly for more parameter customization:
-
+## To run with Null-Space Velocity Control (Kinematic Control):
 ```bash
-ros2 run ros2_kdl_package ros2_kdl_node --ros-args -p cmd_interface:=velocity -p ctrl:=<controller_type>
+ros2 launch ros2_kdl_package ros2_kdl_node.launch.py ctrl:=velocity_ctrl_null
+```
+
+## To run with Vision-Based Control:
+```bash
+ros2 launch ros2_kdl_package ros2_kdl_node.launch.py ctrl:=vision_ctrl
 ```
 
 ---
 
-## Action Server
+## Send Trajectory Goal
 
 Execute Cartesian trajectory:
+To execute the trajectory, launch the Action Client. This node loads the parameters from config/kdl_params.yaml and sends the goal to the server.
 
 ```bash
-ros2 action send_goal /execute_trajectory ros2_kdl_package/action/ExecuteTrajectory \
-"{traj_duration: 25.0, acc_duration: 10.0, total_time: 25.0, kp: 1.0, end_position_x: 0.7, end_position_y: 0.0, end_position_z: 1.0}"
+ros2 launch ros2_kdl_package kdl_client.launch.py
 ```
+##Configuration
 
-Feedback is published during execution.
+You can modify the trajectory points and duration by editing the YAML file:
+- File: src/ros2_kdl_package/config/kdl_params.yaml
+- Parameters: traj_duration, end_position_x, end_position_y, end_position_z, etc.
 
 ---
 
